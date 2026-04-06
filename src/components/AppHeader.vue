@@ -1,3 +1,7 @@
+<script setup>
+import { isMockMode } from '../api/useMockMode.js'
+</script>
+
 <template>
   <header class="app-header">
     <div class="header-left">
@@ -24,6 +28,10 @@
       </nav>
     </div>
     <div class="header-right">
+      <button class="mock-toggle" :class="{ active: isMockMode }" @click="isMockMode = !isMockMode" :title="isMockMode ? 'Mock 모드 (클릭하면 실제 API)' : '실제 API (클릭하면 Mock)'">
+        <span class="mock-dot" />
+        {{ isMockMode ? 'Mock' : 'API' }}
+      </button>
       <button class="icon-btn" title="검색">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
@@ -178,5 +186,42 @@
 
 .avatar:hover {
   border-color: rgba(255,255,255,0.5);
+}
+
+.mock-toggle {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.15);
+  color: rgba(255,255,255,0.6);
+  padding: 5px 11px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  letter-spacing: 0.3px;
+  transition: all 0.15s;
+  margin-right: 4px;
+}
+
+.mock-toggle:hover {
+  background: rgba(255,255,255,0.14);
+  color: rgba(255,255,255,0.85);
+}
+
+.mock-toggle.active {
+  background: rgba(255,190,0,0.15);
+  border-color: rgba(255,190,0,0.4);
+  color: #FFD43B;
+}
+
+.mock-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+  flex-shrink: 0;
 }
 </style>

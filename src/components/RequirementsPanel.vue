@@ -92,8 +92,9 @@
 import { reactive, ref, onMounted, onBeforeUnmount } from 'vue'
 import * as XLSX from 'xlsx'
 import BaseDropdown from './BaseDropdown.vue'
+import { generateTestCases } from '../api/testcase.js'
 
-const emit = defineEmits(['generate'])
+const emit = defineEmits(['generate', 'error', 'loading'])
 
 const isLoading = ref(false)
 const uploadedFile = ref(null)
@@ -169,9 +170,16 @@ function removeFile() { uploadedFile.value = null }
 async function handleGenerate() {
   if (!form.title || !form.description) return
   isLoading.value = true
-  await new Promise(r => setTimeout(r, 800))
-  emit('generate', { ...form })
-  isLoading.value = false
+  emit('loading', true)
+  try {
+    const data = await generateTestCases({ ...form })
+    emit('generate', data)
+  } catch (err) {
+    emit('error', err.message)
+  } finally {
+    isLoading.value = false
+    emit('loading', false)
+  }
 }
 </script>
 

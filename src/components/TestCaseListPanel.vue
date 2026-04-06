@@ -37,7 +37,21 @@
         <div class="col-priority">우선순위</div>
       </div>
 
-      <div v-if="testCases.length === 0" class="empty-state">
+      <div v-if="isLoading" class="table-body">
+        <div v-for="n in 6" :key="n" class="table-row skeleton-row">
+          <div class="col-no"><span class="skel skel-circle" /></div>
+          <div class="col-title">
+            <span class="skel skel-line" style="width: 52px; height: 10px;" />
+            <span class="skel skel-line" style="width: 85%; height: 12px; margin-top: 4px;" />
+          </div>
+          <div class="col-program"><span class="skel skel-line" style="width: 80px; height: 20px; border-radius: 4px;" /></div>
+          <div class="col-testdata"><span class="skel skel-line" style="width: 90%; height: 11px;" /></div>
+          <div class="col-badge" style="display:flex;justify-content:center;"><span class="skel skel-line" style="width: 44px; height: 18px; border-radius: 20px;" /></div>
+          <div class="col-priority" style="display:flex;justify-content:center;"><span class="skel skel-circle" style="width: 14px; height: 14px;" /></div>
+        </div>
+      </div>
+
+      <div v-else-if="testCases.length === 0" class="empty-state">
         <div class="empty-icon">
           <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2">
             <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
@@ -88,7 +102,8 @@ import { ref, onMounted, onBeforeUnmount } from 'vue'
 
 const props = defineProps({
   testCases: { type: Array, default: () => [] },
-  selectedId: { type: [String, Number], default: null }
+  selectedId: { type: [String, Number], default: null },
+  isLoading: { type: Boolean, default: false }
 })
 
 const emit = defineEmits(['select'])
@@ -381,4 +396,29 @@ function downloadExcel() {
 
 .drop-enter-active, .drop-leave-active { transition: opacity 0.15s ease, transform 0.15s ease; }
 .drop-enter-from, .drop-leave-to { opacity: 0; transform: translateY(-6px); }
+
+.skeleton-row { cursor: default; pointer-events: none; }
+.skeleton-row:hover { background: transparent; }
+
+.skel {
+  display: block;
+  background: linear-gradient(90deg, var(--gray-100) 25%, #e8ecf0 50%, var(--gray-100) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.4s infinite;
+  border-radius: 4px;
+}
+
+.skel-circle {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  margin: 0 auto;
+}
+
+.skel-line { height: 11px; }
+
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
 </style>
