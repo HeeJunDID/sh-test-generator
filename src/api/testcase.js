@@ -95,6 +95,24 @@ function getMockData(form) {
   ]
 }
 
+export async function getHistoryList() {
+  const res = await fetch(`${BASE_URL}/api/history`)
+  const json = await res.json()
+  if (!res.ok || !json.success) {
+    throw new Error(json.message || '이력을 불러오는 데 실패했습니다.')
+  }
+  return json.data
+}
+
+export async function getHistoryDetail(id) {
+  const res = await fetch(`${BASE_URL}/api/history/${id}`)
+  const json = await res.json()
+  if (!res.ok || !json.success) {
+    throw new Error(json.message || '이력 상세를 불러오는 데 실패했습니다.')
+  }
+  return json.data
+}
+
 export async function generateTestCases(form) {
   if (isMockMode.value) {
     await new Promise(r => setTimeout(r, 800))

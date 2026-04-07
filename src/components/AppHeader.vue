@@ -1,11 +1,17 @@
 <script setup>
 import { isMockMode } from '../api/useMockMode.js'
+
+const props = defineProps({
+  activeTab: { type: String, default: 'generate' }
+})
+
+const emit = defineEmits(['tab-change', 'go-landing'])
 </script>
 
 <template>
   <header class="app-header">
     <div class="header-left">
-      <div class="logo">
+      <div class="logo" style="cursor:pointer" @click="emit('go-landing')" title="홈으로">
         <div class="logo-mark">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
             <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" fill="white" stroke="white" stroke-width="1" stroke-linejoin="round"/>
@@ -18,12 +24,19 @@ import { isMockMode } from '../api/useMockMode.js'
       </div>
       <div class="divider" />
       <nav class="tab-nav">
-        <button class="tab-btn active">
+        <button class="tab-btn" :class="{ active: activeTab === 'generate' }" @click="emit('tab-change', 'generate')">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
             <polyline points="14 2 14 8 20 8"/>
           </svg>
           요구사항 정의
+        </button>
+        <button class="tab-btn" :class="{ active: activeTab === 'history' }" @click="emit('tab-change', 'history')">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"/>
+            <polyline points="12 6 12 12 16 14"/>
+          </svg>
+          이력
         </button>
       </nav>
     </div>

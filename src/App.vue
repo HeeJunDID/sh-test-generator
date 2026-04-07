@@ -1,37 +1,54 @@
 <template>
   <div class="app">
-    <AppHeader />
-    <div v-if="errorMessage" class="error-toast" @click="errorMessage = null">
-      {{ errorMessage }}
-    </div>
-    <main class="main-content">
-      <div class="left-column">
-        <RequirementsPanel @generate="handleGenerate" @error="handleError" @loading="isLoading = $event" />
+    <Transition name="fade" mode="out-in">
+      <LandingPage v-if="page === 'landing'" @start="goTo('generate')" @history="goTo('history')" />
+      <div v-else class="app-inner">
+        <AppHeader :active-tab="activeTab" @tab-change="activeTab = $event" @go-landing="page = 'landing'" />
+        <div v-if="errorMessage" class="error-toast" @click="errorMessage = null">
+          {{ errorMessage }}
+        </div>
+        <main class="main-content" v-if="activeTab === 'generate'">
+          <div class="left-column">
+            <RequirementsPanel @generate="handleGenerate" @error="handleError" @loading="isLoading = $event" />
+          </div>
+          <div class="right-column">
+            <TestCaseListPanel
+              :test-cases="testCases"
+              :selected-id="selectedTestCase?.id"
+              :is-loading="isLoading"
+              @select="selectedTestCase = $event"
+            />
+            <TestCaseDetailPanel :selected="selectedTestCase" />
+          </div>
+        </main>
+        <main class="main-content history-content" v-else-if="activeTab === 'history'">
+          <HistoryListPanel @error="handleError" />
+        </main>
       </div>
-      <div class="right-column">
-        <TestCaseListPanel
-          :test-cases="testCases"
-          :selected-id="selectedTestCase?.id"
-          :is-loading="isLoading"
-          @select="selectedTestCase = $event"
-        />
-        <TestCaseDetailPanel :selected="selectedTestCase" />
-      </div>
-    </main>
+    </Transition>
   </div>
 </template>
 
 <script setup>
 import { ref } from 'vue'
+import LandingPage from './components/LandingPage.vue'
 import AppHeader from './components/AppHeader.vue'
 import RequirementsPanel from './components/RequirementsPanel.vue'
 import TestCaseListPanel from './components/TestCaseListPanel.vue'
 import TestCaseDetailPanel from './components/TestCaseDetailPanel.vue'
+import HistoryListPanel from './components/HistoryListPanel.vue'
 
+const page = ref('landing')
+const activeTab = ref('generate')
 const testCases = ref([])
 const selectedTestCase = ref(null)
 const errorMessage = ref(null)
 const isLoading = ref(false)
+
+function goTo(tab) {
+  activeTab.value = tab
+  page.value = 'app'
+}
 
 function handleGenerate(data) {
   testCases.value = data
@@ -46,6 +63,11 @@ function handleError(message) {
 
 <style>
 .app {
+  height: 100vh;
+  overflow: hidden;
+}
+
+.app-inner {
   display: flex;
   flex-direction: column;
   height: 100vh;
@@ -59,6 +81,10 @@ function handleError(message) {
   padding: 16px 20px;
   flex: 1;
   overflow: hidden;
+}
+
+.history-content {
+  grid-template-columns: 1fr;
 }
 
 .left-column,
@@ -83,5 +109,14 @@ function handleError(message) {
   z-index: 1000;
   cursor: pointer;
   box-shadow: 0 4px 16px rgba(255,59,59,0.35);
+}
+
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.2s ease;
+}
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
 }
 </style>
