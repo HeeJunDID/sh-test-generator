@@ -1,11 +1,38 @@
 <script setup>
+import { ref, onMounted, onUnmounted } from 'vue'
 import { isMockMode } from '../api/useMockMode.js'
+import { user } from '../composables/useAuth.js'
 
 const props = defineProps({
   activeTab: { type: String, default: 'generate' }
 })
 
-const emit = defineEmits(['tab-change', 'go-landing'])
+const emit = defineEmits(['tab-change', 'go-landing', 'logout', 'open-settings'])
+
+const dropdownOpen = ref(false)
+
+function toggleDropdown() {
+  dropdownOpen.value = !dropdownOpen.value
+}
+
+function handleSettings() {
+  dropdownOpen.value = false
+  emit('open-settings')
+}
+
+function handleLogout() {
+  dropdownOpen.value = false
+  emit('logout')
+}
+
+function handleOutsideClick(e) {
+  if (!e.target.closest('.avatar-wrap')) {
+    dropdownOpen.value = false
+  }
+}
+
+onMounted(() => document.addEventListener('click', handleOutsideClick))
+onUnmounted(() => document.removeEventListener('click', handleOutsideClick))
 </script>
 
 <template>
@@ -55,10 +82,38 @@ const emit = defineEmits(['tab-change', 'go-landing'])
           <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/>
         </svg>
       </button>
-      <div class="avatar">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
-        </svg>
+
+      <div class="avatar-wrap">
+        <div class="avatar" @click.stop="toggleDropdown" title="프로필">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
+          </svg>
+        </div>
+
+        <Transition name="dropdown">
+          <div v-if="dropdownOpen" class="dropdown-menu">
+            <div class="dropdown-user">
+              <span class="dropdown-displayname">{{ user?.displayName || user?.username }}</span>
+              <span class="dropdown-username">@{{ user?.username }}</span>
+            </div>
+            <div class="dropdown-divider" />
+            <button class="dropdown-item" @click="handleSettings">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="3"/>
+                <path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/>
+              </svg>
+              설정
+            </button>
+            <button class="dropdown-item logout" @click="handleLogout">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+                <polyline points="16 17 21 12 16 7"/>
+                <line x1="21" y1="12" x2="9" y2="12"/>
+              </svg>
+              로그아웃
+            </button>
+          </div>
+        </Transition>
       </div>
     </div>
   </header>
@@ -182,6 +237,11 @@ const emit = defineEmits(['tab-change', 'go-landing'])
   color: white;
 }
 
+.avatar-wrap {
+  position: relative;
+  margin-left: 4px;
+}
+
 .avatar {
   width: 32px;
   height: 32px;
@@ -191,7 +251,6 @@ const emit = defineEmits(['tab-change', 'go-landing'])
   align-items: center;
   justify-content: center;
   color: white;
-  margin-left: 4px;
   cursor: pointer;
   border: 2px solid rgba(255,255,255,0.2);
   transition: border-color 0.15s;
@@ -199,6 +258,70 @@ const emit = defineEmits(['tab-change', 'go-landing'])
 
 .avatar:hover {
   border-color: rgba(255,255,255,0.5);
+}
+
+.dropdown-menu {
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.18);
+  min-width: 180px;
+  overflow: hidden;
+  z-index: 100;
+}
+
+.dropdown-user {
+  padding: 14px 16px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.dropdown-displayname {
+  font-size: 13px;
+  font-weight: 700;
+  color: #111827;
+}
+
+.dropdown-username {
+  font-size: 11px;
+  color: #9ca3af;
+}
+
+.dropdown-divider {
+  height: 1px;
+  background: #f3f4f6;
+}
+
+.dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  background: none;
+  border: none;
+  padding: 11px 16px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #374151;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background 0.12s;
+  text-align: left;
+}
+
+.dropdown-item:hover {
+  background: #f9fafb;
+}
+
+.dropdown-item.logout {
+  color: #ef4444;
+}
+
+.dropdown-item.logout:hover {
+  background: #fef2f2;
 }
 
 .mock-toggle {
@@ -236,5 +359,16 @@ const emit = defineEmits(['tab-change', 'go-landing'])
   border-radius: 50%;
   background: currentColor;
   flex-shrink: 0;
+}
+
+.dropdown-enter-active,
+.dropdown-leave-active {
+  transition: opacity 0.15s, transform 0.15s;
+}
+
+.dropdown-enter-from,
+.dropdown-leave-to {
+  opacity: 0;
+  transform: translateY(-6px);
 }
 </style>

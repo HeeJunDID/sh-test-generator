@@ -1,6 +1,11 @@
 import { isMockMode } from './useMockMode.js'
+import { token } from '../composables/useAuth.js'
 
 const BASE_URL = import.meta.env.VITE_API_BASE_URL ?? ''
+
+function authHeaders() {
+  return token.value ? { 'Authorization': `Bearer ${token.value}` } : {}
+}
 
 function getMockData(form) {
   return [
@@ -96,7 +101,7 @@ function getMockData(form) {
 }
 
 export async function getHistoryList() {
-  const res = await fetch(`${BASE_URL}/api/history`)
+  const res = await fetch(`${BASE_URL}/api/history`, { headers: authHeaders() })
   const json = await res.json()
   if (!res.ok || !json.success) {
     throw new Error(json.message || '이력을 불러오는 데 실패했습니다.')
@@ -105,7 +110,7 @@ export async function getHistoryList() {
 }
 
 export async function getHistoryDetail(id) {
-  const res = await fetch(`${BASE_URL}/api/history/${id}`)
+  const res = await fetch(`${BASE_URL}/api/history/${id}`, { headers: authHeaders() })
   const json = await res.json()
   if (!res.ok || !json.success) {
     throw new Error(json.message || '이력 상세를 불러오는 데 실패했습니다.')
@@ -121,7 +126,7 @@ export async function generateTestCases(form) {
 
   const res = await fetch(`${BASE_URL}/api/generate`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 'Content-Type': 'application/json', ...authHeaders() },
     body: JSON.stringify(form)
   })
 

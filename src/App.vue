@@ -1,9 +1,15 @@
 <template>
   <div class="app">
     <Transition name="fade" mode="out-in">
-      <LandingPage v-if="page === 'landing'" @start="goTo('generate')" @history="goTo('history')" />
+      <LandingPage v-if="page === 'landing'" @start="handleStart" @history="handleHistoryFromLanding" />
       <div v-else class="app-inner">
-        <AppHeader :active-tab="activeTab" @tab-change="activeTab = $event" @go-landing="page = 'landing'" />
+        <AppHeader
+          :active-tab="activeTab"
+          @tab-change="activeTab = $event"
+          @go-landing="page = 'landing'"
+          @logout="handleLogout"
+          @open-settings="showSettings = true"
+        />
         <div v-if="errorMessage" class="error-toast" @click="errorMessage = null">
           {{ errorMessage }}
         </div>
@@ -26,17 +32,23 @@
         </main>
       </div>
     </Transition>
+
+    <LoginModal v-if="showLogin" @success="handleLoginSuccess" @close="showLogin = false" />
+    <SettingsModal v-if="showSettings" @close="showSettings = false" />
   </div>
 </template>
 
 <script setup>
 import { ref } from 'vue'
+import { isLoggedIn, logout } from './composables/useAuth.js'
 import LandingPage from './components/LandingPage.vue'
 import AppHeader from './components/AppHeader.vue'
 import RequirementsPanel from './components/RequirementsPanel.vue'
 import TestCaseListPanel from './components/TestCaseListPanel.vue'
 import TestCaseDetailPanel from './components/TestCaseDetailPanel.vue'
 import HistoryListPanel from './components/HistoryListPanel.vue'
+import LoginModal from './components/LoginModal.vue'
+import SettingsModal from './components/SettingsModal.vue'
 
 const page = ref('landing')
 const activeTab = ref('generate')
@@ -44,6 +56,40 @@ const testCases = ref([])
 const selectedTestCase = ref(null)
 const errorMessage = ref(null)
 const isLoading = ref(false)
+const showLogin = ref(false)
+const showSettings = ref(false)
+const pendingTab = ref(null)
+
+function handleStart() {
+  if (isLoggedIn.value) {
+    goTo('generate')
+  } else {
+    pendingTab.value = 'generate'
+    showLogin.value = true
+  }
+}
+
+function handleHistoryFromLanding() {
+  if (isLoggedIn.value) {
+    goTo('history')
+  } else {
+    pendingTab.value = 'history'
+    showLogin.value = true
+  }
+}
+
+function handleLoginSuccess() {
+  showLogin.value = false
+  goTo(pendingTab.value || 'generate')
+  pendingTab.value = null
+}
+
+function handleLogout() {
+  logout()
+  page.value = 'landing'
+  testCases.value = []
+  selectedTestCase.value = null
+}
 
 function goTo(tab) {
   activeTab.value = tab
