@@ -14,12 +14,19 @@
           </button>
           <Transition name="drop">
             <ul class="more-dropdown" v-show="moreOpen">
-              <li :class="{ disabled: testCases.length === 0 }" @click="testCases.length > 0 && (downloadExcel(), moreOpen = false)">
+              <li :class="{ disabled: testCases.length === 0 }" @click="testCases.length > 0 && (downloadAll(), moreOpen = false)">
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                   <polyline points="8 17 12 21 16 17"/><line x1="12" y1="12" x2="12" y2="21"/>
                   <path d="M20.88 18.09A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.29"/>
                 </svg>
-                Excel 다운로드
+                전체 다운로드
+              </li>
+              <li :class="{ disabled: checkedIds.size === 0 }" @click="checkedIds.size > 0 && (downloadSelected(), moreOpen = false)">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="8 17 12 21 16 17"/><line x1="12" y1="12" x2="12" y2="21"/>
+                  <path d="M20.88 18.09A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.29"/>
+                </svg>
+                선택 다운로드 <span v-if="checkedIds.size > 0" class="check-count">({{ checkedIds.size }})</span>
               </li>
             </ul>
           </Transition>
@@ -29,6 +36,9 @@
 
     <div class="table-wrapper">
       <div class="table-head">
+        <div class="col-check">
+          <input type="checkbox" class="cb" :checked="allChecked" :indeterminate.prop="someChecked" @change="toggleAll" @click.stop />
+        </div>
         <div class="col-no">No</div>
         <div class="col-title">테스트케이스</div>
         <div class="col-program">프로그램명</div>
@@ -68,9 +78,12 @@
           v-for="(tc, index) in testCases"
           :key="tc.id"
           class="table-row"
-          :class="{ selected: selectedId === tc.id }"
+          :class="{ selected: selectedId === tc.id, checked: checkedIds.has(tc.id) }"
           @click="emit('select', tc)"
         >
+          <div class="col-check" @click.stop>
+            <input type="checkbox" class="cb" :checked="checkedIds.has(tc.id)" @change="toggleCheck(tc.id)" />
+          </div>
           <div class="col-no">
             <span class="row-num">{{ index + 1 }}</span>
           </div>
@@ -98,7 +111,7 @@
 
 <script setup>
 import * as XLSX from 'xlsx'
-import { ref, onMounted, onBeforeUnmount } from 'vue'
+import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
 
 const props = defineProps({
   testCases: { type: Array, default: () => [] },
@@ -110,6 +123,28 @@ const emit = defineEmits(['select'])
 
 const moreOpen = ref(false)
 const moreMenuRef = ref(null)
+const checkedIds = ref(new Set())
+
+const allChecked = computed(() =>
+  props.testCases.length > 0 && props.testCases.every(tc => checkedIds.value.has(tc.id))
+)
+const someChecked = computed(() =>
+  props.testCases.some(tc => checkedIds.value.has(tc.id)) && !allChecked.value
+)
+
+function toggleAll() {
+  if (allChecked.value) {
+    checkedIds.value = new Set()
+  } else {
+    checkedIds.value = new Set(props.testCases.map(tc => tc.id))
+  }
+}
+
+function toggleCheck(id) {
+  const next = new Set(checkedIds.value)
+  next.has(id) ? next.delete(id) : next.add(id)
+  checkedIds.value = next
+}
 
 function handleClickOutside(e) {
   if (moreMenuRef.value && !moreMenuRef.value.contains(e.target)) moreOpen.value = false
@@ -124,8 +159,8 @@ function categoryClass(cat) {
   return 'tag-blue'
 }
 
-function downloadExcel() {
-  const rows = props.testCases.map((tc, i) => ({
+function toRows(list) {
+  return list.map((tc, i) => ({
     'No': i + 1,
     'ID': tc.id,
     '프로그램명': tc.programName ?? '',
@@ -137,10 +172,22 @@ function downloadExcel() {
     '우선순위': { high: '높음', medium: '보통', low: '낮음' }[tc.priority] ?? '',
     '구분': tc.category ?? ''
   }))
+}
+
+function writeExcel(rows, filename) {
   const ws = XLSX.utils.json_to_sheet(rows)
   const wb = XLSX.utils.book_new()
   XLSX.utils.book_append_sheet(wb, ws, '테스트케이스')
-  XLSX.writeFile(wb, '테스트케이스_목록.xlsx')
+  XLSX.writeFile(wb, filename)
+}
+
+function downloadAll() {
+  writeExcel(toRows(props.testCases), '테스트케이스_전체.xlsx')
+}
+
+function downloadSelected() {
+  const selected = props.testCases.filter(tc => checkedIds.value.has(tc.id))
+  writeExcel(toRows(selected), `테스트케이스_선택${selected.length}건.xlsx`)
 }
 </script>
 
@@ -244,7 +291,7 @@ function downloadExcel() {
 
 .table-head {
   display: grid;
-  grid-template-columns: 48px 1fr 110px 140px 56px 52px;
+  grid-template-columns: 28px 48px 1fr 110px 140px 56px 52px;
   background: var(--blue-navy);
   color: rgba(255,255,255,0.85);
   padding: 10px 14px;
@@ -254,10 +301,18 @@ function downloadExcel() {
   text-transform: uppercase;
 }
 
+.col-check { display: flex; align-items: center; justify-content: center; }
 .col-no { text-align: center; }
 .col-program { font-size: 11px; }
 .col-testdata { font-size: 11px; min-width: 0; }
 .col-badge, .col-priority { text-align: center; }
+
+.cb {
+  width: 14px; height: 14px; cursor: pointer;
+  accent-color: var(--blue-primary);
+}
+.table-row.checked { background: #f0f5ff; }
+.check-count { font-size: 10px; opacity: 0.8; }
 
 .empty-state {
   display: flex;
@@ -292,7 +347,7 @@ function downloadExcel() {
 
 .table-row {
   display: grid;
-  grid-template-columns: 48px 1fr 110px 140px 56px 52px;
+  grid-template-columns: 28px 48px 1fr 110px 140px 56px 52px;
   padding: 10px 14px;
   border-bottom: 1px solid var(--gray-100);
   cursor: pointer;

@@ -13,12 +13,19 @@
             <h2 class="modal-title">{{ history?.title }}</h2>
           </div>
           <div class="modal-header-right">
-            <button class="excel-btn" @click="downloadExcel" :disabled="!history?.testCases?.length">
+            <button class="excel-btn" @click="downloadAll" :disabled="!history?.testCases?.length">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <polyline points="8 17 12 21 16 17"/><line x1="12" y1="12" x2="12" y2="21"/>
                 <path d="M20.88 18.09A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.29"/>
               </svg>
-              Excel 다운로드
+              전체 다운로드
+            </button>
+            <button class="excel-btn excel-btn-selected" @click="downloadSelected" :disabled="checkedIds.size === 0">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="8 17 12 21 16 17"/><line x1="12" y1="12" x2="12" y2="21"/>
+                <path d="M20.88 18.09A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.29"/>
+              </svg>
+              선택 다운로드<span v-if="checkedIds.size > 0"> ({{ checkedIds.size }})</span>
             </button>
             <button class="close-btn" @click="$emit('close')" title="닫기">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -44,6 +51,9 @@
               </div>
               <div class="table-wrapper">
                 <div class="table-head">
+                  <div class="col-check">
+                    <input type="checkbox" class="cb" :checked="allChecked" :indeterminate.prop="someChecked" @change="toggleAll" @click.stop />
+                  </div>
                   <div class="col-no">No</div>
                   <div class="col-title">테스트케이스</div>
                   <div class="col-program">프로그램명</div>
@@ -55,9 +65,12 @@
                     v-for="(tc, index) in history.testCases"
                     :key="tc.id"
                     class="table-row"
-                    :class="{ selected: selectedTc?.id === tc.id }"
+                    :class="{ selected: selectedTc?.id === tc.id, checked: checkedIds.has(tc.id) }"
                     @click="selectedTc = tc"
                   >
+                    <div class="col-check" @click.stop>
+                      <input type="checkbox" class="cb" :checked="checkedIds.has(tc.id)" @change="toggleCheck(tc.id)" />
+                    </div>
                     <div class="col-no">
                       <span class="row-num" :class="{ active: selectedTc?.id === tc.id }">{{ index + 1 }}</span>
                     </div>
@@ -144,6 +157,28 @@ const emit = defineEmits(['close', 'error'])
 const history = ref(null)
 const isLoading = ref(false)
 const selectedTc = ref(null)
+const checkedIds = ref(new Set())
+
+const allChecked = computed(() =>
+  !!history.value?.testCases?.length && history.value.testCases.every(tc => checkedIds.value.has(tc.id))
+)
+const someChecked = computed(() =>
+  !!history.value?.testCases?.some(tc => checkedIds.value.has(tc.id)) && !allChecked.value
+)
+
+function toggleAll() {
+  if (allChecked.value) {
+    checkedIds.value = new Set()
+  } else {
+    checkedIds.value = new Set(history.value.testCases.map(tc => tc.id))
+  }
+}
+
+function toggleCheck(id) {
+  const next = new Set(checkedIds.value)
+  next.has(id) ? next.delete(id) : next.add(id)
+  checkedIds.value = next
+}
 
 const priorityLabel = computed(() => {
   return { high: '높음', medium: '보통', low: '낮음' }[selectedTc.value?.priority] ?? '-'
@@ -183,9 +218,8 @@ function tcCategoryClass(cat) {
   return 'tag-blue'
 }
 
-function downloadExcel() {
-  if (!history.value?.testCases?.length) return
-  const rows = history.value.testCases.map((tc, i) => ({
+function toRows(list) {
+  return list.map((tc, i) => ({
     'No': i + 1,
     'ID': tc.id,
     '프로그램명': tc.programName ?? '',
@@ -197,11 +231,26 @@ function downloadExcel() {
     '우선순위': { high: '높음', medium: '보통', low: '낮음' }[tc.priority] ?? '',
     '구분': tc.category ?? ''
   }))
+}
+
+function writeExcel(rows, filename) {
   const ws = XLSX.utils.json_to_sheet(rows)
   const wb = XLSX.utils.book_new()
   XLSX.utils.book_append_sheet(wb, ws, '테스트케이스')
+  XLSX.writeFile(wb, filename)
+}
+
+function downloadAll() {
+  if (!history.value?.testCases?.length) return
   const safeTitle = (history.value.title ?? '테스트케이스').replace(/[\\/:*?"<>|]/g, '_').slice(0, 30)
-  XLSX.writeFile(wb, `${safeTitle}_테스트케이스.xlsx`)
+  writeExcel(toRows(history.value.testCases), `${safeTitle}_전체.xlsx`)
+}
+
+function downloadSelected() {
+  const selected = (history.value?.testCases ?? []).filter(tc => checkedIds.value.has(tc.id))
+  if (!selected.length) return
+  const safeTitle = (history.value.title ?? '테스트케이스').replace(/[\\/:*?"<>|]/g, '_').slice(0, 30)
+  writeExcel(toRows(selected), `${safeTitle}_선택${selected.length}건.xlsx`)
 }
 
 onMounted(load)
@@ -293,8 +342,10 @@ onMounted(load)
   font-family: inherit;
   transition: background 0.15s;
 }
-.excel-btn:hover { background: #15803D; }
+.excel-btn:hover:not(:disabled) { background: #15803D; }
 .excel-btn:disabled { background: var(--gray-200); color: var(--gray-400); cursor: not-allowed; }
+.excel-btn-selected { background: #1d4ed8; }
+.excel-btn-selected:hover:not(:disabled) { background: #1e40af; }
 
 .close-btn {
   background: none;
@@ -395,7 +446,7 @@ onMounted(load)
 
 .table-head {
   display: grid;
-  grid-template-columns: 40px 1fr 90px 65px 52px;
+  grid-template-columns: 24px 40px 1fr 90px 65px 52px;
   background: var(--blue-navy);
   color: rgba(255,255,255,0.85);
   padding: 8px 12px;
@@ -406,7 +457,10 @@ onMounted(load)
   flex-shrink: 0;
 }
 
+.col-check { display: flex; align-items: center; justify-content: center; }
 .col-no, .col-badge, .col-priority { text-align: center; }
+.cb { width: 13px; height: 13px; cursor: pointer; accent-color: var(--blue-primary); }
+.table-row.checked { background: #f0f5ff; }
 
 .table-body {
   overflow-y: auto;
@@ -415,7 +469,7 @@ onMounted(load)
 
 .table-row {
   display: grid;
-  grid-template-columns: 40px 1fr 90px 65px 52px;
+  grid-template-columns: 24px 40px 1fr 90px 65px 52px;
   padding: 9px 12px;
   border-bottom: 1px solid var(--gray-100);
   cursor: pointer;
