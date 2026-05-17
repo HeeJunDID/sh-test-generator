@@ -178,8 +178,8 @@ function categoryClass(cat) {
 
 function tcCategoryClass(cat) {
   if (!cat) return ''
-  if (cat.includes('예외')) return 'tag-orange'
-  if (cat.includes('성능')) return 'tag-purple'
+  if (cat.includes('예외') || cat.includes('보안')) return 'tag-orange'
+  if (cat.includes('성능') || cat.includes('신뢰') || cat.includes('비기능') || cat.includes('사용성')) return 'tag-purple'
   return 'tag-blue'
 }
 

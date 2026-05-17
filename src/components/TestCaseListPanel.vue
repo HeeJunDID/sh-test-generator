@@ -119,8 +119,8 @@ onBeforeUnmount(() => document.removeEventListener('click', handleClickOutside))
 
 function categoryClass(cat) {
   if (!cat) return ''
-  if (cat.includes('예외')) return 'tag-orange'
-  if (cat.includes('성능')) return 'tag-purple'
+  if (cat.includes('예외') || cat.includes('보안')) return 'tag-orange'
+  if (cat.includes('성능') || cat.includes('신뢰') || cat.includes('비기능') || cat.includes('사용성')) return 'tag-purple'
   return 'tag-blue'
 }
 
@@ -244,7 +244,7 @@ function downloadExcel() {
 
 .table-head {
   display: grid;
-  grid-template-columns: 48px 1fr 110px 140px 72px 60px;
+  grid-template-columns: 48px 1fr 110px 140px 56px 52px;
   background: var(--blue-navy);
   color: rgba(255,255,255,0.85);
   padding: 10px 14px;
@@ -292,7 +292,7 @@ function downloadExcel() {
 
 .table-row {
   display: grid;
-  grid-template-columns: 48px 1fr 110px 140px 72px 60px;
+  grid-template-columns: 48px 1fr 110px 140px 56px 52px;
   padding: 10px 14px;
   border-bottom: 1px solid var(--gray-100);
   cursor: pointer;
@@ -375,9 +375,10 @@ function downloadExcel() {
   display: inline-block;
   font-size: 10px;
   font-weight: 700;
-  padding: 2px 7px;
+  padding: 2px 6px;
   border-radius: 20px;
   letter-spacing: 0.2px;
+  white-space: nowrap;
 }
 .tag-blue { background: var(--blue-100); color: var(--blue-primary); }
 .tag-orange { background: #FFF4ED; color: #C2410C; }
