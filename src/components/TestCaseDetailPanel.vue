@@ -28,6 +28,16 @@
       </div>
 
       <div class="section-grid">
+        <div v-if="selected.testDetail" class="detail-section">
+          <div class="section-label">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+            </svg>
+            테스트 상세
+          </div>
+          <p class="section-value detail-desc">{{ selected.testDetail }}</p>
+        </div>
+
         <div class="detail-section">
           <div class="section-label">
             <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
@@ -239,6 +249,13 @@ function categoryClass(cat) {
   border-left: 3px solid var(--gray-200);
 }
 
+.section-value.detail-desc {
+  color: var(--gray-600);
+  font-style: italic;
+  border-left: 3px solid var(--blue-200);
+  padding-left: 10px;
+  line-height: 1.6;
+}
 .section-value.highlight {
   border-left-color: var(--blue-primary);
   background: var(--blue-50);

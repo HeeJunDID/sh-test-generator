@@ -115,6 +115,11 @@
                   <h3 class="detail-title">{{ selectedTc.title }}</h3>
                 </div>
 
+                <div v-if="selectedTc.testDetail" class="detail-section">
+                  <div class="section-label">테스트 상세</div>
+                  <p class="section-value detail-desc">{{ selectedTc.testDetail }}</p>
+                </div>
+
                 <div class="detail-section">
                   <div class="section-label">전제조건</div>
                   <p class="section-value">{{ selectedTc.precondition || '-' }}</p>
@@ -659,6 +664,13 @@ onMounted(load)
   border-left: 3px solid var(--gray-200);
 }
 
+.section-value.detail-desc {
+  color: var(--gray-600);
+  font-style: italic;
+  border-left: 3px solid var(--blue-200);
+  padding-left: 10px;
+  line-height: 1.6;
+}
 .section-value.highlight {
   border-left-color: var(--blue-primary);
   background: var(--blue-50);
