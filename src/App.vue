@@ -1,5 +1,6 @@
 <template>
   <div class="app">
+    <TopProgressBar :loading="isLoading" />
     <Transition name="fade" mode="out-in">
       <LandingPage v-if="page === 'landing'" @start="handleStart" @history="handleHistoryFromLanding" />
       <div v-else class="app-inner">
@@ -15,7 +16,7 @@
         </div>
         <main class="main-content" v-if="activeTab === 'generate'">
           <div class="left-column">
-            <RequirementsPanel @generate="handleGenerate" @error="handleError" @loading="isLoading = $event" />
+            <RequirementsPanel @generate="handleGenerate" @error="handleError" @loading="handleLoading" />
           </div>
           <div class="right-column">
             <TestCaseListPanel
@@ -49,6 +50,7 @@ import TestCaseDetailPanel from './components/TestCaseDetailPanel.vue'
 import HistoryListPanel from './components/HistoryListPanel.vue'
 import LoginModal from './components/LoginModal.vue'
 import SettingsModal from './components/SettingsModal.vue'
+import TopProgressBar from './components/TopProgressBar.vue'
 
 const page = ref('landing')
 const activeTab = ref('generate')
@@ -94,6 +96,14 @@ function handleLogout() {
 function goTo(tab) {
   activeTab.value = tab
   page.value = 'app'
+}
+
+function handleLoading(val) {
+  isLoading.value = val
+  if (val) {
+    testCases.value = []
+    selectedTestCase.value = null
+  }
 }
 
 function handleGenerate(data) {
