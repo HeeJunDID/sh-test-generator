@@ -9,7 +9,6 @@
           @tab-change="activeTab = $event"
           @go-landing="page = 'landing'"
           @logout="handleLogout"
-          @open-settings="showSettings = true"
         />
         <div v-if="errorMessage" class="error-toast" @click="errorMessage = null">
           {{ errorMessage }}
@@ -35,7 +34,6 @@
     </Transition>
 
     <LoginModal v-if="showLogin" @success="handleLoginSuccess" @close="showLogin = false" />
-    <SettingsModal v-if="showSettings" @close="showSettings = false" />
   </div>
 </template>
 
@@ -49,7 +47,6 @@ import TestCaseListPanel from './components/TestCaseListPanel.vue'
 import TestCaseDetailPanel from './components/TestCaseDetailPanel.vue'
 import HistoryListPanel from './components/HistoryListPanel.vue'
 import LoginModal from './components/LoginModal.vue'
-import SettingsModal from './components/SettingsModal.vue'
 import TopProgressBar from './components/TopProgressBar.vue'
 
 const page = ref('landing')
@@ -59,7 +56,6 @@ const selectedTestCase = ref(null)
 const errorMessage = ref(null)
 const isLoading = ref(false)
 const showLogin = ref(false)
-const showSettings = ref(false)
 const pendingTab = ref(null)
 
 function handleStart() {
