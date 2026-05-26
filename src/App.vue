@@ -30,9 +30,6 @@
         <main class="main-content history-content" v-else-if="activeTab === 'history'">
           <HistoryListPanel @error="handleError" @auth-error="handleAuthError" />
         </main>
-        <main class="main-content history-content" v-else-if="activeTab === 'admin'">
-          <AdminPage />
-        </main>
       </div>
     </Transition>
 
@@ -50,7 +47,6 @@ import RequirementsPanel from './components/RequirementsPanel.vue'
 import TestCaseListPanel from './components/TestCaseListPanel.vue'
 import TestCaseDetailPanel from './components/TestCaseDetailPanel.vue'
 import HistoryListPanel from './components/HistoryListPanel.vue'
-import AdminPage from './components/AdminPage.vue'
 import LoginModal from './components/LoginModal.vue'
 import RegisterModal from './components/RegisterModal.vue'
 import TopProgressBar from './components/TopProgressBar.vue'
