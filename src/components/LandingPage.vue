@@ -13,8 +13,13 @@
         </div>
       </div>
       <div class="header-btns">
-        <button class="header-register-btn" @click="$emit('register')">회원가입</button>
-        <button class="header-start-btn" @click="$emit('start')">로그인</button>
+        <template v-if="isLoggedIn">
+          <button class="header-start-btn" @click="$emit('start')">시작하기</button>
+        </template>
+        <template v-else>
+          <button class="header-register-btn" @click="$emit('register')">회원가입</button>
+          <button class="header-start-btn" @click="$emit('start')">로그인</button>
+        </template>
       </div>
     </header>
 
@@ -165,6 +170,7 @@
 </template>
 
 <script setup>
+import { isLoggedIn } from '../composables/useAuth.js'
 defineEmits(['start', 'history', 'register'])
 </script>
 
