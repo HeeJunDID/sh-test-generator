@@ -7,6 +7,7 @@ const emit = defineEmits(['success', 'close', 'go-login'])
 const form = ref({ username: '', password: '', passwordConfirm: '', displayName: '', team: '' })
 const loading = ref(false)
 const error = ref(null)
+const done = ref(false)
 
 async function handleRegister() {
   const { username, password, passwordConfirm, displayName, team } = form.value
@@ -26,7 +27,7 @@ async function handleRegister() {
   loading.value = true
   try {
     await registerApi({ username, password, displayName, team })
-    emit('success')
+    done.value = true
   } catch (e) {
     error.value = e.message
   } finally {
@@ -52,7 +53,28 @@ async function handleRegister() {
           <p class="modal-subtitle">테스트케이스 자동생성 시스템</p>
         </div>
 
-        <div class="modal-body">
+        <!-- 성공 화면 -->
+        <div v-if="done" class="modal-body success-body">
+          <div class="success-icon">
+            <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+              <polyline points="22 4 12 14.01 9 11.01"/>
+            </svg>
+          </div>
+          <h3 class="success-title">가입 신청이 완료되었습니다</h3>
+          <div class="success-notice">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"/>
+              <line x1="12" y1="8" x2="12" y2="12"/>
+              <line x1="12" y1="16" x2="12.01" y2="16"/>
+            </svg>
+            관리자 승인 후 서비스를 이용하실 수 있습니다.
+          </div>
+          <button class="submit-btn" @click="emit('go-login')">로그인 화면으로</button>
+        </div>
+
+        <!-- 입력 폼 -->
+        <div v-else class="modal-body">
           <div class="field">
             <label class="field-label">아이디 <span class="required">*</span></label>
             <input v-model="form.username" class="field-input" type="text" placeholder="아이디를 입력하세요" />
@@ -247,4 +269,44 @@ async function handleRegister() {
 }
 
 @keyframes spin { to { transform: rotate(360deg); } }
+
+.success-body {
+  align-items: center;
+  text-align: center;
+  padding: 36px 28px 32px;
+}
+
+.success-icon {
+  width: 64px;
+  height: 64px;
+  background: #d1fae5;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #059669;
+  margin-bottom: 16px;
+}
+
+.success-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: #111827;
+  margin: 0 0 16px;
+}
+
+.success-notice {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  background: #fef3c7;
+  color: #92400e;
+  font-size: 13px;
+  font-weight: 600;
+  padding: 12px 16px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  text-align: left;
+  line-height: 1.4;
+}
 </style>

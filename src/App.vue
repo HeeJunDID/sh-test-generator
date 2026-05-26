@@ -128,8 +128,6 @@ function openRegister() {
 
 function onRegisterSuccess() {
   showRegister.value = false
-  errorMessage.value = '가입 신청이 완료되었습니다. 관리자 승인 후 로그인 가능합니다.'
-  setTimeout(() => { errorMessage.value = null }, 6000)
 }
 </script>
 
