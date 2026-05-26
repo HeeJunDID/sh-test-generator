@@ -317,4 +317,14 @@ onUnmounted(() => document.removeEventListener('click', handleOutsideClick))
   opacity: 0;
   transform: translateY(-6px);
 }
+
+@media (max-width: 768px) {
+  .app-header { padding: 0 12px; height: 52px; }
+  .logo-text-wrap { display: none; }
+  .divider { display: none; }
+  .icon-btn { display: none; }
+  .header-left { gap: 8px; }
+  .tab-btn { font-size: 12px; padding: 5px 10px; gap: 4px; }
+  .logo-mark { width: 28px; height: 28px; }
+}
 </style>

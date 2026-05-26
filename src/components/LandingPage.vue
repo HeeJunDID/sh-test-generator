@@ -174,7 +174,6 @@ defineEmits(['start', 'history', 'register'])
   display: flex;
   flex-direction: column;
   background: white;
-  overflow-y: auto;
 }
 
 /* Header */

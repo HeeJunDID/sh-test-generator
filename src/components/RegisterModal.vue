@@ -129,6 +129,7 @@ async function handleRegister() {
   background: white;
   border-radius: 16px;
   width: 380px;
+  max-width: calc(100vw - 32px);
   box-shadow: 0 24px 64px rgba(0, 0, 0, 0.18);
   overflow: hidden;
 }

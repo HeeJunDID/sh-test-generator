@@ -50,8 +50,7 @@ body {
 }
 
 #app {
-  height: 100vh;
-  overflow: hidden;
+  min-height: 100vh;
 }
 
 ::-webkit-scrollbar { width: 5px; height: 5px; }

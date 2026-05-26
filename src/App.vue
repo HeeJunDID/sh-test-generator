@@ -133,10 +133,6 @@ function onRegisterSuccess() {
 </script>
 
 <style>
-.app {
-  height: 100vh;
-}
-
 .app-inner {
   display: flex;
   flex-direction: column;
@@ -164,6 +160,24 @@ function onRegisterSuccess() {
   flex-direction: column;
   gap: 16px;
   overflow-y: auto;
+}
+
+@media (max-width: 768px) {
+  .app-inner {
+    height: auto;
+    min-height: 100vh;
+    overflow-y: auto;
+  }
+  .main-content {
+    grid-template-columns: 1fr;
+    overflow: visible;
+    height: auto;
+    padding: 12px;
+  }
+  .left-column,
+  .right-column {
+    overflow-y: visible;
+  }
 }
 
 .toast {

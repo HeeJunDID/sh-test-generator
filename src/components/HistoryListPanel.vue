@@ -367,4 +367,18 @@ onMounted(loadHistory)
   0% { background-position: 200% 0; }
   100% { background-position: -200% 0; }
 }
+
+@media (max-width: 768px) {
+  .table-head {
+    grid-template-columns: 36px 1fr 70px 70px;
+  }
+  .table-head .col-count,
+  .table-head .col-date { display: none; }
+  .table-row {
+    grid-template-columns: 36px 1fr 70px 70px;
+  }
+  .col-count, .col-date { display: none; }
+  .table-body { max-height: none; }
+  .item-desc { display: none; }
+}
 </style>
