@@ -94,7 +94,7 @@ import * as XLSX from 'xlsx'
 import BaseDropdown from './BaseDropdown.vue'
 import { generateTestCases } from '../api/testcase.js'
 
-const emit = defineEmits(['generate', 'error', 'loading'])
+const emit = defineEmits(['generate', 'error', 'loading', 'auth-error'])
 
 const isLoading = ref(false)
 const uploadedFile = ref(null)
@@ -175,7 +175,8 @@ async function handleGenerate() {
     const data = await generateTestCases({ ...form })
     emit('generate', data)
   } catch (err) {
-    emit('error', err.message)
+    if (err.isAuthError) emit('auth-error')
+    else emit('error', err.message)
   } finally {
     isLoading.value = false
     emit('loading', false)

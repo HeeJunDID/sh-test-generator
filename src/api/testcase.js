@@ -136,11 +136,5 @@ export async function generateTestCases(form) {
     body: JSON.stringify(form)
   })
 
-  const json = await res.json()
-
-  if (!res.ok || !json.success) {
-    throw new Error(json.message || '테스트케이스 생성에 실패했습니다.')
-  }
-
-  return json.data
+  return handleResponse(res, '테스트케이스 생성에 실패했습니다.')
 }

@@ -15,7 +15,7 @@
         </div>
         <main class="main-content" v-if="activeTab === 'generate'">
           <div class="left-column">
-            <RequirementsPanel @generate="handleGenerate" @error="handleError" @loading="handleLoading" />
+            <RequirementsPanel @generate="handleGenerate" @error="handleError" @loading="handleLoading" @auth-error="handleAuthError" />
           </div>
           <div class="right-column">
             <TestCaseListPanel
@@ -116,8 +116,9 @@ function handleError(message) {
 }
 
 function handleAuthError() {
+  errorMessage.value = '세션이 만료되었습니다. 다시 로그인해주세요.'
+  pendingTab.value = activeTab.value
   page.value = 'landing'
-  pendingTab.value = 'history'
   showLogin.value = true
 }
 
@@ -175,7 +176,7 @@ function onRegisterSuccess() {
   border-radius: 8px;
   font-size: 13px;
   font-weight: 600;
-  z-index: 1000;
+  z-index: 2000;
   cursor: pointer;
   white-space: nowrap;
 }
