@@ -12,7 +12,10 @@
           <span class="logo-product">테스트케이스 자동생성</span>
         </div>
       </div>
-      <button class="header-start-btn" @click="$emit('start')">시작하기</button>
+      <div class="header-btns">
+        <button class="header-register-btn" @click="$emit('register')">회원가입</button>
+        <button class="header-start-btn" @click="$emit('start')">로그인</button>
+      </div>
     </header>
 
     <main class="hero">
@@ -162,7 +165,7 @@
 </template>
 
 <script setup>
-defineEmits(['start', 'history'])
+defineEmits(['start', 'history', 'register'])
 </script>
 
 <style scoped>
@@ -218,6 +221,26 @@ defineEmits(['start', 'history'])
   font-weight: 700;
   color: white;
 }
+
+.header-btns {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.header-register-btn {
+  background: rgba(255,255,255,0.12);
+  color: white;
+  border: 1.5px solid rgba(255,255,255,0.25);
+  padding: 8px 18px;
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.15s;
+}
+.header-register-btn:hover { background: rgba(255,255,255,0.2); border-color: rgba(255,255,255,0.45); }
 
 .header-start-btn {
   background: var(--blue-primary);

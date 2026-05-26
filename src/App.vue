@@ -2,7 +2,7 @@
   <div class="app">
     <TopProgressBar :loading="isLoading" />
     <Transition name="fade" mode="out-in">
-      <LandingPage v-if="page === 'landing'" @start="handleStart" @history="handleHistoryFromLanding" />
+      <LandingPage v-if="page === 'landing'" @start="handleStart" @history="handleHistoryFromLanding" @register="openRegister" />
       <div v-else class="app-inner">
         <AppHeader
           :active-tab="activeTab"
@@ -136,13 +136,13 @@ function onRegisterSuccess() {
 <style>
 .app {
   height: 100vh;
-  overflow: hidden;
 }
 
 .app-inner {
   display: flex;
   flex-direction: column;
   height: 100vh;
+  overflow: hidden;
   background: var(--blue-50);
 }
 
