@@ -93,7 +93,7 @@ import { ref, onMounted } from 'vue'
 import { getHistoryList } from '../api/testcase.js'
 import HistoryPreviewModal from './HistoryPreviewModal.vue'
 
-const emit = defineEmits(['error'])
+const emit = defineEmits(['error', 'auth-error'])
 
 const historyList = ref([])
 const isLoading = ref(false)
@@ -104,7 +104,11 @@ async function loadHistory() {
   try {
     historyList.value = await getHistoryList()
   } catch (e) {
-    emit('error', e.message)
+    if (e.isAuthError) {
+      emit('auth-error')
+    } else {
+      emit('error', e.message)
+    }
   } finally {
     isLoading.value = false
   }

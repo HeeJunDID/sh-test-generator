@@ -1,10 +1,24 @@
 import { isMockMode } from './useMockMode.js'
-import { token } from '../composables/useAuth.js'
+import { token, logout } from '../composables/useAuth.js'
 
 const BASE_URL = import.meta.env.VITE_API_BASE_URL ?? ''
 
 function authHeaders() {
   return token.value ? { 'Authorization': `Bearer ${token.value}` } : {}
+}
+
+async function handleResponse(res, fallbackMessage) {
+  if (res.status === 401 || res.status === 403) {
+    logout()
+    const err = new Error('세션이 만료되었습니다. 다시 로그인해주세요.')
+    err.isAuthError = true
+    throw err
+  }
+  const json = await res.json()
+  if (!res.ok || !json.success) {
+    throw new Error(json.message || fallbackMessage)
+  }
+  return json.data
 }
 
 function getMockData(form) {
@@ -102,20 +116,12 @@ function getMockData(form) {
 
 export async function getHistoryList() {
   const res = await fetch(`${BASE_URL}/api/history`, { headers: authHeaders() })
-  const json = await res.json()
-  if (!res.ok || !json.success) {
-    throw new Error(json.message || '이력을 불러오는 데 실패했습니다.')
-  }
-  return json.data
+  return handleResponse(res, '이력을 불러오는 데 실패했습니다.')
 }
 
 export async function getHistoryDetail(id) {
   const res = await fetch(`${BASE_URL}/api/history/${id}`, { headers: authHeaders() })
-  const json = await res.json()
-  if (!res.ok || !json.success) {
-    throw new Error(json.message || '이력 상세를 불러오는 데 실패했습니다.')
-  }
-  return json.data
+  return handleResponse(res, '이력 상세를 불러오는 데 실패했습니다.')
 }
 
 export async function generateTestCases(form) {

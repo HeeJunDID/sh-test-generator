@@ -15,6 +15,18 @@ export async function loginApi(username, password) {
   return json.data
 }
 
+export async function registerApi({ username, password, displayName, team }) {
+  const res = await fetch(`${BASE_URL}/api/auth/register`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ username, password, displayName, team })
+  })
+  const json = await res.json()
+  if (!res.ok || !json.success) {
+    throw new Error(json.message || '회원가입에 실패했습니다.')
+  }
+}
+
 export async function updateSettingsApi(preferredAiProvider) {
   const res = await fetch(`${BASE_URL}/api/user/settings`, {
     method: 'PUT',

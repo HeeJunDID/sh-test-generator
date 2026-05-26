@@ -1,35 +1,37 @@
 <script setup>
 import { ref } from 'vue'
-import { loginApi } from '../api/auth.js'
-import { setAuth } from '../composables/useAuth.js'
+import { registerApi } from '../api/auth.js'
 
-const emit = defineEmits(['success', 'close', 'go-register'])
+const emit = defineEmits(['success', 'close', 'go-login'])
 
-const username = ref('')
-const password = ref('')
+const form = ref({ username: '', password: '', passwordConfirm: '', displayName: '', team: '' })
 const loading = ref(false)
 const error = ref(null)
 
-async function handleLogin() {
-  if (!username.value || !password.value) {
-    error.value = '아이디와 비밀번호를 입력하세요.'
+async function handleRegister() {
+  const { username, password, passwordConfirm, displayName, team } = form.value
+  if (!username || !password || !displayName) {
+    error.value = '아이디, 비밀번호, 이름은 필수 입력 항목입니다.'
+    return
+  }
+  if (password !== passwordConfirm) {
+    error.value = '비밀번호가 일치하지 않습니다.'
+    return
+  }
+  if (password.length < 6) {
+    error.value = '비밀번호는 6자 이상이어야 합니다.'
     return
   }
   error.value = null
   loading.value = true
   try {
-    const data = await loginApi(username.value, password.value)
-    setAuth(data)
+    await registerApi({ username, password, displayName, team })
     emit('success')
   } catch (e) {
     error.value = e.message
   } finally {
     loading.value = false
   }
-}
-
-function handleKeydown(e) {
-  if (e.key === 'Enter') handleLogin()
 }
 </script>
 
@@ -46,43 +48,42 @@ function handleKeydown(e) {
             </div>
             <span>Shinhan</span>
           </div>
-          <h2 class="modal-title">로그인</h2>
+          <h2 class="modal-title">회원가입</h2>
           <p class="modal-subtitle">테스트케이스 자동생성 시스템</p>
         </div>
 
         <div class="modal-body">
           <div class="field">
-            <label class="field-label">아이디</label>
-            <input
-              v-model="username"
-              class="field-input"
-              type="text"
-              placeholder="아이디를 입력하세요"
-              @keydown="handleKeydown"
-              autofocus
-            />
+            <label class="field-label">아이디 <span class="required">*</span></label>
+            <input v-model="form.username" class="field-input" type="text" placeholder="아이디를 입력하세요" />
           </div>
           <div class="field">
-            <label class="field-label">비밀번호</label>
-            <input
-              v-model="password"
-              class="field-input"
-              type="password"
-              placeholder="비밀번호를 입력하세요"
-              @keydown="handleKeydown"
-            />
+            <label class="field-label">비밀번호 <span class="required">*</span></label>
+            <input v-model="form.password" class="field-input" type="password" placeholder="6자 이상 입력하세요" />
+          </div>
+          <div class="field">
+            <label class="field-label">비밀번호 확인 <span class="required">*</span></label>
+            <input v-model="form.passwordConfirm" class="field-input" type="password" placeholder="비밀번호를 다시 입력하세요" @keydown.enter="handleRegister" />
+          </div>
+          <div class="field">
+            <label class="field-label">이름 <span class="required">*</span></label>
+            <input v-model="form.displayName" class="field-input" type="text" placeholder="실명을 입력하세요" />
+          </div>
+          <div class="field">
+            <label class="field-label">소속팀</label>
+            <input v-model="form.team" class="field-input" type="text" placeholder="소속팀을 입력하세요 (선택)" />
           </div>
 
           <div v-if="error" class="error-msg">{{ error }}</div>
 
-          <button class="login-btn" :disabled="loading" @click="handleLogin">
+          <button class="submit-btn" :disabled="loading" @click="handleRegister">
             <span v-if="loading" class="spinner" />
-            {{ loading ? '로그인 중...' : '로그인' }}
+            {{ loading ? '신청 중...' : '가입 신청' }}
           </button>
 
-          <p class="register-link">
-            계정이 없으신가요?
-            <button class="link-btn" @click="emit('go-register')">회원가입 신청</button>
+          <p class="login-link">
+            이미 계정이 있으신가요?
+            <button class="link-btn" @click="emit('go-login')">로그인</button>
           </p>
         </div>
       </div>
@@ -105,14 +106,14 @@ function handleKeydown(e) {
 .modal-card {
   background: white;
   border-radius: 16px;
-  width: 360px;
+  width: 380px;
   box-shadow: 0 24px 64px rgba(0, 0, 0, 0.18);
   overflow: hidden;
 }
 
 .modal-header {
   background: var(--blue-navy);
-  padding: 28px 28px 24px;
+  padding: 24px 28px 20px;
   text-align: center;
 }
 
@@ -121,7 +122,7 @@ function handleKeydown(e) {
   align-items: center;
   justify-content: center;
   gap: 8px;
-  margin-bottom: 14px;
+  margin-bottom: 12px;
   color: var(--blue-light, #a8c4e0);
   font-size: 12px;
   font-weight: 600;
@@ -152,16 +153,16 @@ function handleKeydown(e) {
 }
 
 .modal-body {
-  padding: 28px;
+  padding: 24px 28px 28px;
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 12px;
 }
 
 .field {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 5px;
 }
 
 .field-label {
@@ -170,10 +171,14 @@ function handleKeydown(e) {
   color: var(--gray-600, #4b5563);
 }
 
+.required {
+  color: #ef4444;
+}
+
 .field-input {
   border: 1.5px solid var(--gray-200, #e5e7eb);
   border-radius: 8px;
-  padding: 10px 12px;
+  padding: 9px 12px;
   font-size: 14px;
   font-family: inherit;
   outline: none;
@@ -192,12 +197,12 @@ function handleKeydown(e) {
   padding: 8px 10px;
 }
 
-.login-btn {
+.submit-btn {
   background: var(--blue-primary, #1a56db);
   color: white;
   border: none;
   border-radius: 8px;
-  padding: 12px;
+  padding: 11px;
   font-size: 14px;
   font-weight: 600;
   font-family: inherit;
@@ -207,19 +212,13 @@ function handleKeydown(e) {
   justify-content: center;
   gap: 8px;
   transition: background 0.15s;
-  margin-top: 4px;
+  margin-top: 2px;
 }
 
-.login-btn:hover:not(:disabled) {
-  background: #1447c0;
-}
+.submit-btn:hover:not(:disabled) { background: #1447c0; }
+.submit-btn:disabled { opacity: 0.7; cursor: not-allowed; }
 
-.login-btn:disabled {
-  opacity: 0.7;
-  cursor: not-allowed;
-}
-
-.register-link {
+.login-link {
   text-align: center;
   font-size: 12px;
   color: var(--gray-500, #6b7280);
@@ -247,7 +246,5 @@ function handleKeydown(e) {
   animation: spin 0.6s linear infinite;
 }
 
-@keyframes spin {
-  to { transform: rotate(360deg); }
-}
+@keyframes spin { to { transform: rotate(360deg); } }
 </style>

@@ -10,7 +10,7 @@
           @go-landing="page = 'landing'"
           @logout="handleLogout"
         />
-        <div v-if="errorMessage" class="error-toast" @click="errorMessage = null">
+        <div v-if="errorMessage" class="toast" :class="errorMessage.startsWith('가입') ? 'toast-success' : 'toast-error'" @click="errorMessage = null">
           {{ errorMessage }}
         </div>
         <main class="main-content" v-if="activeTab === 'generate'">
@@ -28,12 +28,16 @@
           </div>
         </main>
         <main class="main-content history-content" v-else-if="activeTab === 'history'">
-          <HistoryListPanel @error="handleError" />
+          <HistoryListPanel @error="handleError" @auth-error="handleAuthError" />
+        </main>
+        <main class="main-content history-content" v-else-if="activeTab === 'admin'">
+          <AdminPage />
         </main>
       </div>
     </Transition>
 
-    <LoginModal v-if="showLogin" @success="handleLoginSuccess" @close="showLogin = false" />
+    <LoginModal v-if="showLogin" @success="handleLoginSuccess" @close="showLogin = false" @go-register="openRegister" />
+    <RegisterModal v-if="showRegister" @success="onRegisterSuccess" @close="showRegister = false" @go-login="showRegister = false; showLogin = true" />
   </div>
 </template>
 
@@ -46,7 +50,9 @@ import RequirementsPanel from './components/RequirementsPanel.vue'
 import TestCaseListPanel from './components/TestCaseListPanel.vue'
 import TestCaseDetailPanel from './components/TestCaseDetailPanel.vue'
 import HistoryListPanel from './components/HistoryListPanel.vue'
+import AdminPage from './components/AdminPage.vue'
 import LoginModal from './components/LoginModal.vue'
+import RegisterModal from './components/RegisterModal.vue'
 import TopProgressBar from './components/TopProgressBar.vue'
 
 const page = ref('landing')
@@ -56,6 +62,7 @@ const selectedTestCase = ref(null)
 const errorMessage = ref(null)
 const isLoading = ref(false)
 const showLogin = ref(false)
+const showRegister = ref(false)
 const pendingTab = ref(null)
 
 function handleStart() {
@@ -111,6 +118,23 @@ function handleError(message) {
   errorMessage.value = message
   setTimeout(() => { errorMessage.value = null }, 5000)
 }
+
+function handleAuthError() {
+  page.value = 'landing'
+  pendingTab.value = 'history'
+  showLogin.value = true
+}
+
+function openRegister() {
+  showLogin.value = false
+  showRegister.value = true
+}
+
+function onRegisterSuccess() {
+  showRegister.value = false
+  errorMessage.value = '가입 신청이 완료되었습니다. 관리자 승인 후 로그인 가능합니다.'
+  setTimeout(() => { errorMessage.value = null }, 6000)
+}
 </script>
 
 <style>
@@ -147,12 +171,11 @@ function handleError(message) {
   overflow-y: auto;
 }
 
-.error-toast {
+.toast {
   position: fixed;
   top: 20px;
   left: 50%;
   transform: translateX(-50%);
-  background: #FF3B3B;
   color: white;
   padding: 12px 20px;
   border-radius: 8px;
@@ -160,7 +183,17 @@ function handleError(message) {
   font-weight: 600;
   z-index: 1000;
   cursor: pointer;
+  white-space: nowrap;
+}
+
+.toast-error {
+  background: #FF3B3B;
   box-shadow: 0 4px 16px rgba(255,59,59,0.35);
+}
+
+.toast-success {
+  background: #059669;
+  box-shadow: 0 4px 16px rgba(5,150,105,0.35);
 }
 
 .fade-enter-active,
