@@ -477,4 +477,14 @@ function downloadSelected() {
   0% { background-position: 200% 0; }
   100% { background-position: -200% 0; }
 }
+
+@media (max-width: 768px) {
+  .panel { padding: 16px; overflow: hidden; }
+  .table-head,
+  .table-row {
+    grid-template-columns: 28px 36px 1fr 54px 40px;
+  }
+  .col-program, .col-testdata { display: none; }
+  .table-body { max-height: none; overflow-y: visible; }
+}
 </style>
