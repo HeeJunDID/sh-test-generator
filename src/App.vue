@@ -166,6 +166,7 @@ function onRegisterSuccess() {
   .app-inner {
     height: auto;
     min-height: 100vh;
+    overflow-x: hidden;
     overflow-y: auto;
   }
   .main-content {
@@ -177,6 +178,7 @@ function onRegisterSuccess() {
   .left-column,
   .right-column {
     overflow-y: visible;
+    min-width: 0;
   }
 }
 

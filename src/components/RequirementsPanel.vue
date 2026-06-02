@@ -384,6 +384,11 @@ async function handleGenerate() {
 
 @keyframes spin { to { transform: rotate(360deg); } }
 
+@media (max-width: 768px) {
+  .form-row { grid-template-columns: 1fr; }
+  .panel { overflow: hidden; }
+}
+
 .drop-enter-active, .drop-leave-active { transition: opacity 0.15s ease, transform 0.15s ease; }
 .drop-enter-from, .drop-leave-to { opacity: 0; transform: translateY(-6px); }
 </style>
